@@ -1,5 +1,5 @@
 import random
-
+import keyboard
 
 
 class Island:
@@ -35,6 +35,15 @@ class Island:
                 _generate_zone.generate_plants()
         print(_generate_zone.population)
 
+    @staticmethod
+    def main_cycle():
+        while x:
+            for _zone in Island.zones:
+                _zone.life_cycle()
+                if keyboard.is_pressed("esc"):
+                    x = False
+
+
 
 class Zone:
     def __init__(self, zone, weather):
@@ -42,39 +51,68 @@ class Zone:
         self.weather = weather
         self.population = {'predators': [], 'herbivores': [], 'plants': []}
 
-
     def generate_predators(self):
         _predator = random.choice(list(Island.type_predators.keys()))
         self.population['predators'].append(Predators(Island.type_predators[_predator]))
-
 
     def generate_herbivores(self):
         _herbivore = random.choice(list(Island.type_herbivores.keys()))
         self.population['herbivores'].append(Herbivore(Island.type_herbivores[_herbivore]))
 
-
     def generate_plants(self):
         _plant = random.choice(list(Island.type_plants.keys()))
         self.population['plants'].append(Plant(Island.type_plants[_plant]))
+
+    def life_cycle(self):
+        for _pred in self.population['predators']:
+            _pred.implement_frame_pred()
+        for _herb in self.population['herbivores']:
+            _herb.implement_frame_herb()
+        for _plant in self.population['plants']:
+            _plant.month += 1
+
+
+
+
 
 
 class Animal:
     def __init__(self, description):
         self.name = description[3]
-        self.age = 0
+        self.month = 0
         self.speed = description[0]
         self.fatigue = 0
         self.hunger = 0
         self.fatigue_limit = description[1]
         self.hunger_limit = description[2]
 
+    def _sleep(self):
+        fatigue_recovery = random.randint(4, 7)
+        self.fatigue -= fatigue_recovery
+
 
 class Herbivore(Animal):
     age_limit_herbivore = 12
 
+    def _eat(self):
+        pass
+
+    def implement_frame_herb(self):
+        self._sleep()
+        self._eat()
+        self.month += 1
+
 
 class Predators(Animal):
     age_limit_predator = 15
+
+    def _hunt(self):
+        pass
+
+    def implement_frame_pred(self):
+        self._sleep()
+        self._hunt()
+        self.month += 1
 
 
 class Plant:
@@ -83,6 +121,7 @@ class Plant:
     def __init__(self, descrription):
         self.name = descrription[0]
         self.food = descrription[1]
-        self.age = 0
+        self.month = 0
+
 
 Island.generate_zone()
